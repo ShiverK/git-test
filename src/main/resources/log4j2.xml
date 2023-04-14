@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN" monitorInterval="30">
+    <Properties>
+        <Property name="LOG_PATTERN">
+            [%X{TRACE_ID}] %d{yyyy-MMM-dd HH:mm:ss a} [%t] %-5level %logger{36} - %msg%n
+        </Property>
+        <Property name="LOG_HOME">
+            /root/log
+        </Property>
+    </Properties>
+
+    <Filters>
+        <!--这两行Log重复打印太多，所以过滤掉-->
+        <RegexFilter regex=".*New Bucket .*" onMatch="DENY" onMismatch="NEUTRAL"/>
+        <RegexFilter regex=".*Completed refreshing config for bucket .*" onMatch="DENY" onMismatch="NEUTRAL"/>
+<!--        对于有PassWord的日志不打印-->
+        <RegexFilter regex=".*&quot;password&quot;:&quot;.*&quot;.*" useRawMsg="true" onMatch="DENY" onMismatch="NEUTRAL"/>
+    </Filters>
+
+    <Appenders>
+        <Console name="ConsoleAppender" target="SYSTEM_OUT" follow="true">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+        </Console>
+        <RollingFile name="RollingFile">
+            <FileName>${LOG_HOME}/applog.log</FileName>
+<!--            按小时生成，按天打包-->
+            <FilePattern>${LOG_HOME}/$${date:yyyy-MM-dd}/app-%d{yyyy-MM-dd-HH}-%i.log.zip</FilePattern>
+            <PatternLayout>
+                <Pattern>${LOG_PATTERN}</Pattern>
+            </PatternLayout>
+            <Policies>
+            	<CronTriggeringPolicy schedule="0 0 0 * * ?"/>
+<!--                每一个小时生成一个文件-->
+                <TimeBasedTriggeringPolicy interval="1" modulate="true" />
+<!--                每个文件超过250M时，生成下一个文件，50 M才是合理的-->
+                <SizeBasedTriggeringPolicy size="50 MB" />
+            </Policies>
+            
+            <DefaultRolloverStrategy max="10000" compressionLevel="9">
+                <Delete basePath="${LOG_HOME}" maxDepth="2">
+                    <IfFileName glob="*/app-*.log*" />
+<!--                    保存最多60天-->
+                    <IfLastModified age="60d" />
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+    </Appenders>
+
+    <Loggers>
+<!--        <logger name="fileLogger" level="info">-->
+
+<!--        </logger>-->
+        <Root level="info" >
+            <AppenderRef ref="ConsoleAppender" />
+            <AppenderRef ref="RollingFile" />
+        </Root>
+    </Loggers>
+
+
+
+</Configuration>

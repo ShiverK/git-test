@@ -1,0 +1,139 @@
+{
+	"hostname":"192.168.7.197",
+	"server_url":"localhost:9095",
+	"datapath":"C:/Users/zz/Desktop/data/data/datax/dcms",
+	"jpgpath":"/data/jpgs",
+	"INSTALL_PATH":"/home/shuxin/web",
+
+	"USERNAME":"deepln",
+	"MODEL_PATH":"/root/workspace/preprocess/models/",
+	"LOG_PATH":"/root/workspace/preprocess/logs/",
+	"SCRIPT_PATH":"/root/workspace/preprocess/db_dev/",
+	"TMP_PATH":"/root/workspace/preprocess/tmp/",
+	"PKL_PATH":"/root/workspace/preprocess/pkls/",
+	"TRANS_PATH":"/data/trans",
+	"AE_TITLE" : "scu",
+	"AE_PORT" : 2002,
+	"AE_LOG_CONFIG":"/root/log4cplus.config",
+	"AE_TCP_NODELAY":1,
+	"ver": "beta",
+	
+	"RIS": {
+	        "start": 0,
+	        "url": "http://192.168.7.175:13003/post_ris",
+	        "partnerId": "scu_huaxisecond",
+	        "code": "10000",
+	        "deptType": "lung"
+	},
+
+	"couchbase":{
+		"image":"deepln/couchbase:withbackup",
+		"container": "couchbase",
+		"port": 8091,
+		"home": "/home/shuxin/web/couchbase",
+		"datapath": {
+			"host":"/home/shuxin/web/couchbase/DB",
+			"container": "/opt/couchbase/var"
+		},
+		"backup_path": {
+			"host":"/home/shuxin/web/couchbase/backup",
+			"container": "/backup"
+		},
+		"Service": {
+			"services": "kv%2Cn1ql%2Cindex%2Cfts",
+			"url": "/node/controller/setupServices"
+		},
+		"Memory":{
+			"memoryQuota": 4096,
+			"indexMemoryQuota": 2048,
+			"ftsMemoryQuota": 1024,
+			"url": "/pools/default"
+		},
+		"Administrator":{
+			"username": "deepln",
+			"password": "jevoislavieenrose",
+			"url": "/settings/web"
+		},
+		"Bucket": {
+			"name": "bm_sys",
+			"ramQuotaMB": 3072,
+			"url": "/pools/default/buckets"
+		},
+		"data": {
+			"host": "/data/couchbase",
+			"container": "/opt/couchbase"
+		}
+	},
+	
+	"redis":{
+		"image":"redis:latest",
+		"container": "redis",
+		"port": {
+			"host": 1801,
+			"container": 6379
+		}
+	},
+	"backend":{
+		"source_image":"openjdk:14-jdk-alpine",
+		"target_image":"deepln/backend:latest",
+		"container": "backend",
+		"port": 8095,
+		"data": {
+			"host": "/data",
+			"container": "/data"
+		},
+		"workspace": "/root" 
+	},
+	"front":{
+		"source_image":"bm_sys/front:latest",
+		"target_image":"front_tmp:latest",
+		"container": "front",
+		"port": 8096
+	},
+	"preprocess": {
+		"source_image": "deepln/aiserver:latest",
+		"target_image": "deepln/aiserver_auto:latest",
+		"container": "aiserver",
+		"data": {
+			"host":"/data",
+			"container": "/data"
+		},
+		"workspace": "/root/workspace",
+		"url": {
+			"start": 0,
+			"huaxi_ris": "http://192.168.7.175:9513/XMLService.asmx?wsdl"
+		},
+		"log_time":1,
+		"format_origin_log_conf":"/root/log_conf/format_original_singlecase.conf",
+		"transtorage_conf":"/root/log_conf/transtorage_ljx.conf",
+		"service1_conf":"/root/log_conf/service1.conf",
+		"service2_conf":"/root/log_conf/service2.conf",
+		"service3_conf":"/root/log_conf/service3.conf",
+		"service4_conf":"/root/log_conf/service4.conf",
+		"service5_conf":"/root/log_conf/service5.conf",
+		"service6_conf":"/root/log_conf/service6.conf",
+		"service_rmtree_conf":"/root/log_conf/servicermtree.conf",
+		"time_gap_conf":"/root/log_conf/time_gap.conf"
+	},
+	"build": {
+		"image": "deepln/build:latest",
+		"container": "build",
+		"workspace": "/root/workspace"
+	},
+	"ocr": {
+		"image": "deepln/ocrplugin:latest",
+		"container": "ocr",
+		"workspace": "/root/workspace"
+	},
+	"aeserver": {
+		"image": "deepln/aeserver:latest",
+		"container": "aeserver",
+		"data": {
+				"host": "/data",
+				"container": "/data"
+		},
+		"workspace": "/root/workspace",
+		"simple_log_header":"/root/workspace/storescp/simple_log/",
+		"aeserver_log_header":"/root/workspace/storescp/log/"
+	}
+}
